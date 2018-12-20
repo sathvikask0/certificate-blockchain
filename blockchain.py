@@ -144,13 +144,6 @@ node_identifier = str(uuid4()).replace('-', '')
 def mine():
     last_block = blockchain.last_block
 
-    # The sender is "0" to signify that this node has mined a new coin.
-    blockchain.new_transaction(
-        sender="0",                                                               #what should be this?
-        certificate =                                                              # ""
-        recipient=node_identifier,
-    )
-
     # Forge the new Block by adding it to the chain
     previous_hash = blockchain.hash(last_block)
     block = blockchain.new_block(previous_hash)
@@ -178,16 +171,14 @@ def new_transaction():
 
     response = {'message': f'Transaction will be added to Block {index}'}
     return jsonify(response), 201
-
-'''    
+   
 @app.route('/chain', methods=['GET'])
 def full_chain():                                                  # do we need this? we need something like given the key extract all the
     response = {                                                     certificates corresponding to it.
         'chain': blockchain.chain,
         'length': len(blockchain.chain),
     }
-    return jsonify(response), 200        
-'''        
+    return jsonify(response), 200             
 
 @app.route('/transactions/current', methods =['GET'])
 def new_transactions():
@@ -240,29 +231,6 @@ def consensus():
     return jsonify(response), 200
 
 
-'''
-                                                                  IF APPLICABLE    
-@app.route('/transactions/ack/new', methods=['POST'])
-def acknowledge():
-    values = request.get_json()
-    sender = values.get('sender')
-    recipient = values.get('recipient')
-    certificate = values.get('certificate')
-    previous_hash = blockchain.chain[-1]['previous_hash']
-    acknowledgement = hashlib.sha256((sender+recipient+stocksymbol).encode()).hexdigest()
-    blockchain.acknowledgements.append(acknowledgement)
-    response = {
-        "acknowledgements": blockchain.acknowledgements
-    }
-    return jsonify(response)
-    
-@app.route('/transactions/acks', methods=['GET'])
-def acknowledgements():
-    response = {
-        "acknowledgements": blockchain.acknowledgements
-    }
-    return jsonify(response)    
-''' 
 
  '''      
 blockchain = Blockchain()
@@ -272,7 +240,6 @@ blockchain.new_block('1a3f4561c2b32c1')
 print("\nForging a new block...\n\n Chain:",blockchain.chain)
 print("\n\n")
 '''
-
 
 
 if __name__ == '__main__':
