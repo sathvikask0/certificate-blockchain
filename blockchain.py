@@ -12,7 +12,7 @@ class Blockchain:
         self.current_transactions = []
         self.chain = []
         self.nodes = set()
-        #self.acknowledgements = []                                                    # check this! what is this?
+        #self.acknowledgements = []                                                    
         
         # Create the genesis block
         self.new_block(previous_hash='1a3f4561c2b32c1')
@@ -71,7 +71,7 @@ class Blockchain:
 
         # Grab and verify the chains from all the nodes in our network
         for node in neighbours:
-            response = requests.get(f'http://{node}/chain')                                           #what does this do?
+            response = requests.get(f'http://{node}/chain')                                         
 
             if response.status_code == 200:
                 length = response.json()['length']
@@ -103,7 +103,7 @@ class Blockchain:
             'previous_hash': previous_hash or self.hash(self.chain[-1]),
         }
 
-        # Reset the current list of transactions (and acknowledgements if implemented)           #see this thing!
+        # Reset the current list of transactions (and acknowledgements if implemented)           
         self.current_transactions = []
         #self.acknowledgements = []
 
