@@ -8,7 +8,7 @@ class Blockchain:
     def __init__(self):
         self.current_transactions = []
         self.chain = []
-        self.nodes = {'192.168.0.5:5000':'address1','192.168.0.5:5001':'address2','192.168.0.5:5002':'address3','192.168.0.5:5003':'address4'}
+        self.nodes = {'0.0.0.0:5000':'address1','0.0.0.0:5001':'address2','0.0.0.0:5002':'address3','0.0.0.0:5003':'address4'}
         self.leader = 1
         
         # Create the genesis block
@@ -138,8 +138,10 @@ class Blockchain:
 
         return self.last_block['index'] + 1
     
-    def verify_transaction():
-        # Search in nodes and check if it maps to the address (TASK)
+    def verify_certificate(self,ip,sender):
+        # Search in nodes and check if ip maps to "sender"
+        if self.nodes[ip] == sender:
+            return True
         return False
 
     @property

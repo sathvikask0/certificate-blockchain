@@ -29,7 +29,6 @@ def mine():
     }
     return jsonify(response), 200
     
-    
 @app.route('/transactions/new', methods=['POST'])
 def new_transaction():
     values = request.get_json()
@@ -68,6 +67,47 @@ def new_transactions():
     else:
         response = {}
     return jsonify(response)
+
+@app.route('/verify', methods =['GET'])
+def verify_transactions():
+    
+    neighbours = list((blockchain.nodes).keys())
+    response2=[]
+    
+    for node in neighbours:
+        url=f'http://{node}/transactions/current'
+            
+        print("\n\n\n\n",url,"\n\n\n")
+        headers = {
+        'cache-control': "no-cache",
+        'Postman-Token': "7a4b56ed-4cb2-4f1c-8133-b47eb4506522"
+        }
+        
+        response = requests.request("GET", url, headers=headers)
+
+        print(response.json())
+        if response.json() !={}:
+            print(response.json)
+            sender = response.json()['sender']
+            response2.append({
+            'url' : url,
+            'message': 'Transaction error!'
+            })
+            if blockchain.verify_certificate(ip=node,sender=sender):
+                response2[-1]={
+                    'url' : url,
+                    'message': 'Transaction has been verified',
+                    'block' : blockchain.current_transactions
+                            }
+        else:
+            response2.append({
+                            'url' : url,
+                            'message': 'No transaction to verify'
+                            })
+    response2 = {
+                'verified': response2
+                }
+    return jsonify(response2)
 
 @app.route('/nodes/resolve', methods=['GET'])
 def consensus():
