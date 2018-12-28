@@ -2,7 +2,7 @@
 
 Tasks:
 
-Test functions in the class (use Postman)
+Test API's and functions (use Postman)
 
 Look for #..(TASK) comments in the code 
 
