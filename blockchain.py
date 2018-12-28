@@ -2,22 +2,19 @@ import hashlib
 import json
 from time import time
 from urllib.parse import urlparse
-from uuid import uuid4
 import requests
-
-from flask import Flask, jsonify, request
 
 class Blockchain:
     def __init__(self):
         self.current_transactions = []
         self.chain = []
         self.nodes = set()
-        #self.acknowledgements = []                                                    # check this! what is this?
+        self.leader = 0
         
         # Create the genesis block
         self.new_block(previous_hash='1a3f4561c2b32c1')
 
-    def register_node(self, address):
+    def register_node(self, address): # Make it static: Fixed nodes mapped to addresses(TASK)
         """
         Add a new node to the list of nodes
         :param address: Address of node. Eg. 'http://192.168.0.5:5000'
@@ -38,10 +35,27 @@ class Blockchain:
         Determine if a given blockchain is valid
         :return: True if valid, False if not
         """
-
+        
+        new_length = len(chain)
+        our_length = len(self.chain)
+        
         last_block = chain[0]
         current_index = 1
-
+        
+        new_valid_block_found = False
+        
+        # Traverse the chain backwards till a new valid block is found (ignore all other blocks)
+        while new_length > our_length:
+            if chain[new_length-1]['previous_hash']==self.hash(self.chain[-1]):
+                new_valid_block_found = True
+                self.chain.append(chain[new_length-1])
+                break
+            new_length -= 1
+        
+        if not new_valid_block_found:
+            return False
+    
+        # Verifies the validity of rest of the chain
         while current_index < len(chain):
             block = chain[current_index]
             print('{last_block}')
@@ -64,14 +78,16 @@ class Blockchain:
         """
 
         neighbours = self.nodes
-        new_chain = None
-
+        replaced = False
+        
         # We're only looking for chains longer than ours
         max_length = len(self.chain)
-
-        # Grab and verify the chains from all the nodes in our network
+        
+        
+        
+        # Grab and verify the chains from all the nodes in our network in order (TASK)
         for node in neighbours:
-            response = requests.get('http://{node}/chain')                                           #what does this do?
+            response = requests.get('http://{node}/chain')
 
             if response.status_code == 200:
                 length = response.json()['length']
@@ -80,11 +96,10 @@ class Blockchain:
                 # Check if the length is longer and the chain is valid
                 if length > max_length and self.valid_chain(chain):
                     max_length = length
-                    new_chain = chain
+                    replaced = True
 
         # Replace our chain if we discovered a new, valid chain longer than ours
-        if new_chain:
-            self.chain = new_chain
+        if replaced:
             return True
 
         return False
@@ -103,9 +118,8 @@ class Blockchain:
             'previous_hash': previous_hash or self.hash(self.chain[-1]),
         }
 
-        # Reset the current list of transactions (and acknowledgements if implemented)           #see this thing!
+        # Reset the current list of transactions (and acknowledgements if implemented)
         self.current_transactions = []
-        #self.acknowledgements = []
 
         self.chain.append(block)
         return block
@@ -119,6 +133,10 @@ class Blockchain:
         })
 
         return self.last_block['index'] + 1
+    
+    def verify_transaction():
+        # Search in nodes and check if it maps to the address (TASK)
+        return False
 
     @property
     def last_block(self):
@@ -131,116 +149,3 @@ class Blockchain:
 
         block_string = json.dumps(block, sort_keys=True).encode()
         return hashlib.sha256(block_string).hexdigest()
-        
-        
-# Instantiate the Node
-app = Flask(__name__)
-
-# Generate a globally unique address for this node
-node_identifier = str(uuid4()).replace('-', '')
-
-#MINERS!
-@app.route('/mine', methods=['GET'])
-def mine():
-    last_block = blockchain.last_block
-
-    # Forge the new Block by adding it to the chain
-    previous_hash = blockchain.hash(last_block)
-    block = blockchain.new_block(previous_hash)
-
-    response = {
-        'message': "New Block Forged",
-        'index': block['index'],
-        'transactions': block['transactions'],
-        'previous_hash': block['previous_hash'],
-    }
-    return jsonify(response), 200
-    
-    
-@app.route('/transactions/new', methods=['POST'])
-def new_transaction():
-    values = request.get_json()
-    print("\nvalues:",values,"\n")
-    # Check that the required fields are in the POST'ed data
-    required = ['sender','recipient', 'certificate']
-    if not all(k in values for k in required):
-        return 'Missing values', 400
-
-    # Create a new Transaction
-    index = blockchain.new_transaction(values['sender'], values['recipient'], values['certificate']) #send this to miners for verification instead
-
-    response = {'message': 'Transaction will be added to Block {index}'}
-    return jsonify(response), 201
-   
-@app.route('/chain', methods=['GET'])
-def full_chain():                                                  # do we need this? we need something like given the key extract all the
-    response = {                                                     #certificates corresponding to it.
-        'chain': blockchain.chain,
-        'length': len(blockchain.chain),
-    }
-    return jsonify(response), 200             
-
-@app.route('/transactions/current', methods =['GET'])
-def new_transactions():
-    if(len(blockchain.current_transactions)!=0):
-        transaction = blockchain.current_transactions[-1]
-        sender = transaction['sender']
-        recipient = transaction['recipient']
-        certificate = transaction['certificate']
-        response = {
-            'sender': sender,
-            'recipient': recipient,
-            'certificate': certificate,
-        }
-    else:
-        response = {}
-    return jsonify(response)
-
-@app.route('/nodes/register', methods=['POST'])
-def register_nodes():
-    values = request.get_json()
-
-    nodes = values.get('nodes')
-    if nodes is None:
-        return "Error: Please supply a valid list of nodes", 400
-
-    for node in nodes:
-        blockchain.register_node(node)
-
-    response = {
-        'message': 'New nodes have been added',
-        'total_nodes': list(blockchain.nodes),
-    }
-    return jsonify(response), 201
-
-@app.route('/nodes/resolve', methods=['GET'])
-def consensus():
-    replaced = blockchain.resolve_conflicts()
-
-    if replaced:
-        response = {
-            'message': 'Our chain was replaced',
-            'chain': blockchain.chain
-        }
-    else:
-        response = {
-            'message': 'Our chain is authoritative',
-            'chain': blockchain.chain
-        }
-
-    return jsonify(response), 200
-
-
-
-
-
-
-if __name__ == '__main__':
-    from argparse import ArgumentParser
-
-    parser = ArgumentParser()
-    parser.add_argument('-p', '--port', default=5000, type=int, help='port to listen on')
-    args = parser.parse_args()
-    port = args.port
-
-    app.run(host='0.0.0.0', port=port)
