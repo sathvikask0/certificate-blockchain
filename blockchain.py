@@ -44,8 +44,8 @@ class Blockchain:
 
         while current_index < len(chain):
             block = chain[current_index]
-            print(f'{last_block}')
-            print(f'{block}')
+            print('{last_block}')
+            print('{block}')
             print("\n-----------\n")
             # Check that the hash of the block is correct
             last_block_hash = self.hash(last_block)
@@ -71,7 +71,7 @@ class Blockchain:
 
         # Grab and verify the chains from all the nodes in our network
         for node in neighbours:
-            response = requests.get(f'http://{node}/chain')                                           #what does this do?
+            response = requests.get('http://{node}/chain')                                           #what does this do?
 
             if response.status_code == 200:
                 length = response.json()['length']
@@ -169,12 +169,12 @@ def new_transaction():
     # Create a new Transaction
     index = blockchain.new_transaction(values['sender'], values['recipient'], values['certificate']) #send this to miners for verification instead
 
-    response = {'message': f'Transaction will be added to Block {index}'}
+    response = {'message': 'Transaction will be added to Block {index}'}
     return jsonify(response), 201
    
 @app.route('/chain', methods=['GET'])
 def full_chain():                                                  # do we need this? we need something like given the key extract all the
-    response = {                                                     certificates corresponding to it.
+    response = {                                                     #certificates corresponding to it.
         'chain': blockchain.chain,
         'length': len(blockchain.chain),
     }
@@ -232,14 +232,7 @@ def consensus():
 
 
 
- '''      
-blockchain = Blockchain()
-blockchain.new_transaction('ae13114dd2523d23f32','234c23a23e32a23f',{'Name':'John Harvard','Issuing Authority':'Harvard University','Course':'Introduction to Computer Science','Representative':'David J. Malan','Comment':'This is to certify that the applicant successfully completed and received passing grade in the course.'})
-print("\n\n Current transactions:",blockchain.current_transactions)
-blockchain.new_block('1a3f4561c2b32c1')
-print("\nForging a new block...\n\n Chain:",blockchain.chain)
-print("\n\n")
-'''
+
 
 
 if __name__ == '__main__':
