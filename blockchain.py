@@ -13,22 +13,6 @@ class Blockchain:
         
         # Create the genesis block
         self.new_block(previous_hash='1a3f4561c2b32c1')
-    
-    def register_node(self, address): # Make it static: Fixed nodes mapped to addresses(TASK)
-        """
-        Add a new node to the list of nodes
-        :param address: Address of node. Eg. 'http://192.168.0.5:5000'
-        """
-
-        parsed_url = urlparse(address)
-        if parsed_url.netloc:
-            self.nodes.add(parsed_url.netloc)
-        elif parsed_url.path:
-            # Accepts an URL without scheme like '192.168.0.5:5000'.
-            self.nodes.add(parsed_url.path)
-        else:
-            raise ValueError('Invalid URL')
-
 
     def valid_chain(self, chain):
         """
