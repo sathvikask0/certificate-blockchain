@@ -22,7 +22,7 @@ U3:  "72f397dc4e5c197e33a94397dcd95f1ff62912675b2d361ee3408e7783eb218c"
 
 U4:  "d4f1dade285f4b60eb30088dbbf803d551caf3e39288b514a656e546b0def2f5"
 
-Hash (SHA256) them and take [32:] to find the sender_id (replace the addresses in self.nodes with them)
+Hash (SHA256) them and take [32:] to find the sender_id's (replace the addresses in self.nodes with them. Also use them in the 'sender' fields of the certificates for testing)
 
 
 
