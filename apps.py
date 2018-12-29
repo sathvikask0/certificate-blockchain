@@ -55,14 +55,9 @@ def full_chain():
 @app.route('/transactions/current', methods =['GET'])
 def new_transactions():
     if(len(blockchain.current_transactions)!=0):
-        transaction = blockchain.current_transactions[-1]
-        sender = transaction['sender']
-        recipient = transaction['recipient']
-        certificate = transaction['certificate']
+        certificates = blockchain.current_transactions
         response = {
-            'sender': sender,
-            'recipient': recipient,
-            'certificate': certificate,
+            'certificates': certificates
         }
     else:
         response = {}
@@ -88,17 +83,21 @@ def verify_transactions():
         print(response.json())
         if response.json() !={}:
             print(response.json)
-            sender = response.json()['sender']
-            response2.append({
-            'url' : url,
-            'message': 'Transaction error!'
-            })
-            if blockchain.verify_certificate(ip=node,sender=sender):
-                response2[-1]={
-                    'url' : url,
-                    'message': 'Transaction has been verified',
-                    'block' : blockchain.current_transactions
-                            }
+            response = response.json()['certificates']
+            for certificate in response:
+                sender = certificate['sender']
+                response2.append({
+                                 'url' : url,
+                                 'message': 'Transaction error!'
+                                 })
+                print('\nCERTIFICATE:',certificate)
+                if blockchain.verify_certificate(ip=node,sender=sender) and certificate not in blockchain.current_transactions:
+                    blockchain.current_transactions.append(certificate)
+                    response2[-1]={
+                        'url' : url,
+                        'message': 'Transaction has been verified',
+                        'block' : blockchain.current_transactions
+                                }
         else:
             response2.append({
                             'url' : url,
