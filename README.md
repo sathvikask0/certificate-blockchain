@@ -2,7 +2,7 @@
 
 Tasks:
 
-Test API's and functions (use Postman)
+Test API's and functions (https://app.getpostman.com/join-team?invite_code=85949b4751d9d7e0b0312ee6f25c05cd)
 
 Look for #..(TASK) comments in the code 
 
