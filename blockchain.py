@@ -8,7 +8,11 @@ class Blockchain:
     def __init__(self):
         self.current_transactions = []
         self.chain = []
-        self.nodes = {'0.0.0.0:5000':'address1','0.0.0.0:5001':'address2','0.0.0.0:5002':'address3','0.0.0.0:5003':'address4'}
+        self.nodes = {
+        '0.0.0.0:5000':'7a8945671502a288b18146583652fa99',
+        '0.0.0.0:5001':'203f890e4fbf7736d843644ba6554b7b',
+        '0.0.0.0:5002':'9190fd39312b80f90e287dde2424eb80',
+        '0.0.0.0:5003':'6d143bf02f6e8c228f6f00a230088772'}
         self.leader = 1
         
         # Create the genesis block
